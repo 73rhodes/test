@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/messenger.js"></script>
+  </head>
+  <body class="preview1">
+    <h3>iframe: preview1.html</h3>
+    <h3 id="currentState">Preview One</h3>
+    <h3 id="range">A Range</h3>
+    <button id="state">Change State</button>
+    <button id="change">Change Preview</button>
+  </body>
+  <script>
+
+    var channel = "textChange";
+
+    document.querySelector('#change').onclick = function () {
+      window.location = "preview2.html";
+    };
+
+    document.querySelector('#state').onclick = function () {
+      messenger.publish(channel, {state: {text: Date.now()}});
+    };
+
+    messenger.subscribe(channel, window, function (data) {
+      if (data.text) {
+        document.querySelector('#currentState').innerHTML = data.text;
+      }
+    });
+
+    messenger.subscribe("range", window, function (data) {
+      document.querySelector("#range").innerHTML = data.range;
+    });
+
+  </script>
+</html>

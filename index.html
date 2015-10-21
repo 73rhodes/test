@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>A Little PubSub / State Test</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/messenger.js"></script>
+  </head>
+  <body>
+    <div class="preview">
+      <iframe src="preview1.html"></iframe>
+    </div>
+    <div class="sidebar">
+      <h3 style="padding-top: 0.5em;">Sidebar</h3>
+      <h3 id="currentState">Current State</h3>
+      <h3 id="currentRange">A Range</h3>
+      <button id="change">Change State</button>
+      <input id="range" type="range"/>
+    </div>
+    <script>
+
+      var channel = "textChange";
+      var channel2 = "range";
+
+      document.querySelector('button#change').onclick = function () {
+        messenger.publish(channel, {state: {text: Date.now()}});
+      };
+
+      document.querySelector('#range').oninput = function (ev) {
+        console.log("Input change: " + ev.target.value);
+        messenger.publish(channel2, {eventData: {range: ev.target.value/100}});
+      };
+
+      messenger.subscribe(channel, window, function (data) {
+        if (data.text) document.querySelector('#currentState').innerHTML = data.text;
+      });
+
+      messenger.subscribe(channel2, window, function (data) {
+        document.querySelector('#currentRange').innerHTML = data.range;
+      });
+
+    </script>
+  </body>
+</html>
