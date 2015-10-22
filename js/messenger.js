@@ -1,50 +1,57 @@
 // messenger.js
-
-/*global window*/
-
 "use strict";
 
-function Messenger() {
-    this.state = {};
-    this.subscribers = [];
-}
+(function () {
 
-Messenger.prototype.publish = function (channel, message) {
-    if (message.state) {
-        this.state[channel] = message.state;
-        this.notify(channel, this.state[channel]);
-    } else if (message.eventData) {
-        this.notify(channel, message.eventData);
-    }
-};
+    /*global window*/
 
-Messenger.prototype.notify = function (channel, data) {
-    this.subscribers.forEach(function (subscriber) {
-        if (subscriber.channel === channel) {
-            subscriber.callback(data);
+    window.messenger = window.top.messenger || {
+
+        state: {},
+
+        subscribers: [],
+
+        publish: function (channel, message) {
+            if (message.state) {
+                this.state[channel] = message.state;
+                this.notify(channel, this.state[channel]);
+            } else if (message.eventData) {
+                this.notify(channel, message.eventData);
+            }
+        },
+
+        notify: function (channel, data) {
+            function inChannel(subscriber) {
+                return subscriber.channel === channel;
+            }
+            function notify(subscriber) {
+                subscriber.callback(data);
+            }
+            this.subscribers.filter(inChannel).forEach(notify);
+        },
+
+        subscribe: function (channel, win, cb) {
+            this.subscribers.push({
+                "channel": channel,
+                "callback": cb,
+                "window": win
+            });
+            if (this.state[channel]) {
+                cb(this.state[channel]);
+            }
+        },
+
+        unsubscribe: function (win) {
+            function notInWindow(subscriber) {
+                return subscriber.window !== win;
+            }
+            this.subscribers = this.subscribers.filter(notInWindow);
         }
-    });
-};
+    };
 
-Messenger.prototype.subscribe = function (channel, win, cb) {
-    this.subscribers.push({
-        "channel": channel,
-        "callback": cb,
-        "window": win
-    });
-    if (this.state[channel]) {
-        cb(this.state[channel]);
-    }
-};
 
-Messenger.prototype.unsubscribe = function (win) {
-    this.subscribers = this.subscribers.filter(function (subscriber) {
-        return subscriber.window !== win;
-    });
-};
+    window.onbeforeunload = function () {
+        window.messenger.unsubscribe(window);
+    };
 
-window.messenger = window.top.messenger || new Messenger();
-
-window.onbeforeunload = function () {
-    window.messenger.unsubscribe(window);
-};
+}());

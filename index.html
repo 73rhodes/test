@@ -25,7 +25,6 @@
       };
 
       document.querySelector('#range').oninput = function (ev) {
-        console.log("Input change: " + ev.target.value);
         messenger.publish(channel2, {eventData: {range: ev.target.value/100}});
       };
 
