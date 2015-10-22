@@ -14,13 +14,13 @@
         publish: function (channel, message) {
             if (message.state) {
                 this.state[channel] = message.state;
-                this.notify(channel, this.state[channel]);
+                this.notifySubscribers(channel, this.state[channel]);
             } else if (message.eventData) {
-                this.notify(channel, message.eventData);
+                this.notifySubscribers(channel, message.eventData);
             }
         },
 
-        notify: function (channel, data) {
+        notifySubscribers: function (channel, data) {
             function inChannel(subscriber) {
                 return subscriber.channel === channel;
             }
